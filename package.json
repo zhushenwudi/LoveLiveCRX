@@ -1,11 +1,11 @@
 {
-  "name": "chrome-extension-boilerplate-react",
-  "version": "4.4.0",
-  "description": "A chrome extension boilerplate built with React 17, Webpack 5, and Webpack Dev Server 4",
+  "name": "lovelive-crx",
+  "version": "0.1",
+  "description": "一款获取时间段内LoveLive发售歌曲的辅助工具",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lxieyang/chrome-extension-boilerplate-react.git"
+    "url": "https://github.com/zhushenwudi/LoveLiveCRX.git"
   },
   "scripts": {
     "build": "node utils/build.js",
@@ -13,7 +13,10 @@
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
   },
   "dependencies": {
+    "@ant-design/pro-components": "^2.3.35",
     "@hot-loader/react-dom": "^17.0.2",
+    "antd": "^5.0.1",
+    "axios": "^1.2.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hot-loader": "^4.13.1"
