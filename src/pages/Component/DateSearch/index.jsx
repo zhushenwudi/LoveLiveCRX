@@ -1,18 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import './Options.css';
+import './index.css';
 import axios from "axios";
 const cheerio = require('cheerio')
-import {AppUtils} from '../../../utils/app_utils'
+import {AppUtils} from '../../../../utils/app_utils'
 import locale from 'antd/lib/calendar/locale/zh_CN.js'
-import {Button, DatePicker, Image, List, Menu} from "antd";
-import {
-    AppstoreOutlined,
-    ContainerOutlined,
-    DesktopOutlined,
-    MailOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
-    PieChartOutlined,
-} from '@ant-design/icons';
+import {DatePicker, Image, List} from "antd";
 import dayjs from 'dayjs';
+import {Album} from '../../../models/Album'
 
 const aqours = 'https://zh.moegirl.org.cn/LoveLive!Sunshine!!/%E9%9F%B3%E4%B9%90%E5%88%97%E8%A1%A8'
 const niji = 'https://zh.moegirl.org.cn/LoveLive!%E8%99%B9%E5%92%B2%E5%AD%A6%E5%9B%AD%E5%AD%A6%E5%9B%AD%E5%81%B6%E5%83%8F%E5%90%8C%E5%A5%BD%E4%BC%9A/%E9%9F%B3%E4%B9%90%E5%88%97%E8%A1%A8'
@@ -20,36 +14,8 @@ const liella = 'https://zh.moegirl.org.cn/LoveLive!Superstar!!/%E9%9F%B3%E4%B9%9
 
 const dateFormat = 'YYYY-MM-DD';
 
-const Options = () => {
+const DateSearch = () => {
 
-    function getItem(label, key, icon, children, type) {
-        return {
-            key,
-            icon,
-            children,
-            label,
-            type,
-        };
-    }
-
-    const items = [
-        getItem('Option 1', '1', <PieChartOutlined />),
-        getItem('Option 2', '2', <DesktopOutlined />),
-        getItem('Option 3', '3', <ContainerOutlined />),
-        getItem('Navigation One', 'sub1', <MailOutlined />, [
-            getItem('Option 5', '5'),
-            getItem('Option 6', '6'),
-            getItem('Option 7', '7'),
-            getItem('Option 8', '8'),
-        ]),
-        getItem('Navigation Two', 'sub2', <AppstoreOutlined />, [
-            getItem('Option 9', '9'),
-            getItem('Option 10', '10'),
-            getItem('Submenu', 'sub3', null, [getItem('Option 11', '11'), getItem('Option 12', '12')]),
-        ]),
-    ];
-
-    const [collapsed, setCollapsed] = useState(true);
     const [data, setData] = useState([])
     const [loading, setLoading] = useState(true)
     const [rangeMoment, setRangeMoment] = useState([])
@@ -83,7 +49,6 @@ const Options = () => {
             const tempList = []
             result.forEach(item => {
                 if (rangeMoment[0] <= item.timestamp && item.timestamp <= rangeMoment[1]) {
-                    console.log(item)
                     tempList.push(item)
                 }
             })
@@ -187,36 +152,8 @@ const Options = () => {
         })
     }
 
-    const toggleCollapsed = () => {
-        setCollapsed(!collapsed);
-    };
-
-    const onClick = (e) => {
-        console.log('click ', e);
-    };
-
     return (
         <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'row'}}>
-            <div>
-                <Button
-                    type="primary"
-                    onClick={toggleCollapsed}
-                    style={{
-                        marginBottom: 16,
-                    }}
-                >
-                    {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                </Button>
-                <Menu
-                    style={{
-                        width: collapsed ? 80: 256,
-                    }}
-                    onClick={onClick}
-                    inlineCollapsed={collapsed}
-                    mode="inline"
-                    items={items}
-                />
-            </div>
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', flexGrow: 1}}>
                 <DatePicker.RangePicker
                     locale={locale}
@@ -228,7 +165,6 @@ const Options = () => {
                     dataSource={data}
                     loading={loading}
                     renderItem={(item, index) => {
-                        console.log(item.image)
                         return (
                             <div key={"div" + index} style={{display: 'flex', flexDirection: 'column'}}>
                                 <div style={{height: 20}}/>
@@ -261,13 +197,6 @@ const Options = () => {
     );
 };
 
-class Album {
-    constructor(name, image, timestamp, date) {
-        this.name = name
-        this.image = image
-        this.timestamp = timestamp
-        this.date = date
-    }
-}
 
-export default Options;
+
+export default DateSearch;
