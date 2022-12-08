@@ -94,22 +94,15 @@ const ImportHelper = () => {
     const [tabs, setTabs] = useState([])
     const [photoList, setPhotoList] = useState([{"value": "Cover_1.jpg"}])
 
-    const onChange = (key) => {
-        console.log(key)
-        setActiveKey(key);
-    };
     const add = () => {
         const newActiveKey = `Music${newTabIndex.current++}`;
-        const tempList = []
         tabs.forEach((value, index) => {
-            value.key = "Music" + index
             value.label = "Music" + index
-            tempList.push(value)
         })
         setTabs([
-            ...tempList,
+            ...tabs,
             {
-                label: 'Music' + tempList.length,
+                label: 'Music' + tabs.length,
                 music: new Music(),
                 key: newActiveKey,
                 children: renderTabItem(newActiveKey)
@@ -122,7 +115,6 @@ const ImportHelper = () => {
         const newPanes = tabs.filter((pane) => pane.key !== targetKey);
         const tempList = []
         newPanes.forEach((value, index) => {
-            value.key = "Music" + index
             value.label = "Music" + index
             tempList.push(value)
         })
@@ -137,10 +129,16 @@ const ImportHelper = () => {
             add();
         } else {
             remove(targetKey);
+            const _musicList = JSON.parse(JSON.stringify(form.getFieldValue('musicList')));
+            delete _musicList[targetKey]
+            form.setFieldValue('musicList', Object.keys(_musicList).length ? _musicList : null)
         }
     };
 
     const onFinish = (value) => {
+        if (!form.getFieldValue('musicList')) {
+            alert('填歌曲')
+        }
         console.log(value)
     }
 
@@ -153,7 +151,8 @@ const ImportHelper = () => {
             })
         })
         return (
-            <Form.Item label={'封面图'} name={['musicList', key, 'cover_path']} initialValue={arr[0].label} required={true}>
+            <Form.Item label={'封面图'} name={['musicList', key, 'cover_path']} initialValue={arr[0].label}
+                       required={true}>
                 <Select options={arr}/>
             </Form.Item>
         )
@@ -168,16 +167,16 @@ const ImportHelper = () => {
                 onFinish={onFinish}
             >
                 <Form.Item label={"专辑id"} name={"id"}
-                   getValueFromEvent={(e) => {
-                       const { value } = e.target;
-                       return value.replace(/\D/g, "")
-                   }}
-                   rules={[
-                    {
-                        required: true,
-                        message: '请输入专辑id',
-                    },
-                ]}>
+                           getValueFromEvent={(e) => {
+                               const {value} = e.target;
+                               return value.replace(/\D/g, "")
+                           }}
+                           rules={[
+                               {
+                                   required: true,
+                                   message: '请输入专辑id',
+                               },
+                           ]}>
                     <Input onChange={value => setAlbumId(value)} maxLength={3}/>
                 </Form.Item>
                 <Form.Item label={"专辑名"} name={"albumName"} rules={[
@@ -247,7 +246,7 @@ const ImportHelper = () => {
                                                 className="dynamic-delete-button"
                                                 onClick={() => {
                                                     remove(field.name)
-                                                    const tempList = form.getFieldValue("专辑图")
+                                                    const tempList = form.getFieldValue("cover_path")
                                                     setPhotoList(tempList)
                                                 }}
                                             />
@@ -274,14 +273,14 @@ const ImportHelper = () => {
                         <Select.Option value="小组曲">小组曲</Select.Option>
                     </Select>
                 </Form.Item>
-                <Form.Item name={'musicList'} label={"歌曲列表"} labelCol={{span: 24}} validateFirst={true} rules={[
+                <Form.Item label={"歌曲列表"} labelCol={{span: 24}} validateFirst={true} rules={[
                     {
                         required: true,
                         message: '请添加歌曲',
                     },
                 ]}>
                     <Tabs
-                        onChange={onChange}
+                        onChange={setActiveKey}
                         activeKey={activeKey}
                         type="editable-card"
                         onEdit={onEdit}
