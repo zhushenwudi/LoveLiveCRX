@@ -84,12 +84,7 @@ const ImportHelper = () => {
                     <TimePicker format={'mm:ss'} locale={locale} showNow={false}/>
                 </Form.Item>
 
-                <Form.Item label={'可导出'} name={['musicList', key, 'export']} valuePropName="checked" initialValue rules={[
-                    {
-                        required: true,
-                        message: '请输入歌曲id',
-                    },
-                ]}>
+                <Form.Item label={'可导出'} name={['musicList', key, 'export']} valuePropName="checked" initialValue>
                     <Switch checkedChildren="是" unCheckedChildren="否"/>
                 </Form.Item>
             </>
@@ -100,6 +95,7 @@ const ImportHelper = () => {
     const [photoList, setPhotoList] = useState([{"value": "Cover_1.jpg"}])
 
     const onChange = (key) => {
+        console.log(key)
         setActiveKey(key);
     };
     const add = () => {
@@ -171,13 +167,18 @@ const ImportHelper = () => {
                 style={{width: '100%'}}
                 onFinish={onFinish}
             >
-                <Form.Item label={"专辑id"} name={"id"} rules={[
+                <Form.Item label={"专辑id"} name={"id"}
+                   getValueFromEvent={(e) => {
+                       const { value } = e.target;
+                       return value.replace(/\D/g, "")
+                   }}
+                   rules={[
                     {
                         required: true,
                         message: '请输入专辑id',
                     },
                 ]}>
-                    <Input onChange={value => setAlbumId(value)}/>
+                    <Input onChange={value => setAlbumId(value)} maxLength={3}/>
                 </Form.Item>
                 <Form.Item label={"专辑名"} name={"albumName"} rules={[
                     {
@@ -273,7 +274,7 @@ const ImportHelper = () => {
                         <Select.Option value="小组曲">小组曲</Select.Option>
                     </Select>
                 </Form.Item>
-                <Form.Item label={"歌曲列表"} labelCol={{span: 24}} validateFirst={true} rules={[
+                <Form.Item name={'musicList'} label={"歌曲列表"} labelCol={{span: 24}} validateFirst={true} rules={[
                     {
                         required: true,
                         message: '请添加歌曲',
