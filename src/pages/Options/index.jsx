@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {render} from 'react-dom';
 import {getComponentStack, getCurrent, goTo, popToTop, Router} from 'react-chrome-extension-router';
 
-import Options from '../Component/DateSearch/index';
+import DateSearch from '../Component/DateSearch/index';
 import ImportHelper from '../Component/ImportHelper/index';
 import './index.css';
 import {
@@ -31,7 +31,7 @@ const App = () => {
                 popToTop()
                 break
             case '2':
-                goTo(ImportHelper)
+                goTo(DateSearch)
                 break
         }
     };
