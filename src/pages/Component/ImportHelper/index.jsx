@@ -1,98 +1,18 @@
-import React, {useRef, useState} from 'react';
-import {Button, DatePicker, Form, Input, Select, Switch, Tabs, TimePicker} from 'antd';
+import React, {useEffect, useRef, useState} from 'react';
+import {Button, DatePicker, Form, Input, Select, Tabs} from 'antd';
 import {MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
 import locale from 'antd/lib/calendar/locale/zh_CN.js'
 import {Music} from '../../../models/Music'
+import RenderTabItem from './RenderItem'
 
 const ImportHelper = () => {
-    const [albumId, setAlbumId] = useState('')
-    const [albumName, setAlbumName] = useState('')
-    const [activeKey, setActiveKey] = useState();
-
-    const [form] = Form.useForm()
-    const newTabIndex = useRef(0);
-
-    const renderTabItem = (key) => (
-        <Form.Item name={['musicList', key]} key={key.label}>
-            <>
-                <Form.Item label={'歌曲id'} name={['musicList', key, 'musicId']} rules={[
-                    {
-                        required: true,
-                        message: '请输入歌曲id',
-                    },
-                ]}>
-                    <Input/>
-                </Form.Item>
-
-                <Form.Item label={'歌曲名'} name={['musicList', key, 'musicName']} rules={[
-                    {
-                        required: true,
-                        message: '请输入歌曲名',
-                    },
-                ]}>
-                    <Input/>
-                </Form.Item>
-
-                {/*<Form.Item label={'专辑id'} name={['musicList', key, 'album']} initialValue={albumId.target?.value} rules={[*/}
-                {/*    {*/}
-                {/*        required: true,*/}
-                {/*        message: '请输入专辑id',*/}
-                {/*    },*/}
-                {/*]}>*/}
-                {/*    <Input disabled={true}/>*/}
-                {/*</Form.Item>*/}
-
-                {/*<Form.Item label={'专辑名'} name={['musicList', key, 'albumName']} initialValue={albumName.target?.value} rules={[*/}
-                {/*    {*/}
-                {/*        required: true,*/}
-                {/*        message: '请输入专辑名',*/}
-                {/*    },*/}
-                {/*]}>*/}
-                {/*    <Input disabled={true}/>*/}
-                {/*</Form.Item>*/}
-
-                {renderPhotoList(key)}
-
-                <Form.Item label={'歌曲路径'} name={['musicList', key, 'music_path']} rules={[
-                    {
-                        required: true,
-                        message: '请输入歌曲路径',
-                    },
-                ]}>
-                    <Input/>
-                </Form.Item>
-
-                <Form.Item label={'歌手'} name={['musicList', key, 'artist']} rules={[
-                    {
-                        required: true,
-                        message: '请选择歌手',
-                    },
-                ]}>
-                    <Input/>
-                </Form.Item>
-
-                {/*<Form.Item label={'歌手36进制'} name={['musicList', key, 'artist_bin']}>*/}
-                {/*    <Input disabled/>*/}
-                {/*</Form.Item>*/}
-
-                <Form.Item label={'时长'} name={['musicList', key, 'time']} rules={[
-                    {
-                        required: true,
-                        message: '请输入歌曲id',
-                    },
-                ]}>
-                    <TimePicker format={'mm:ss'} locale={locale} showNow={false}/>
-                </Form.Item>
-
-                <Form.Item label={'可导出'} name={['musicList', key, 'export']} valuePropName="checked" initialValue>
-                    <Switch checkedChildren="是" unCheckedChildren="否"/>
-                </Form.Item>
-            </>
-        </Form.Item>
-    )
-
+    const [activeKey, setActiveKey] = useState()
+    const [coverList, setCoverList] = useState([])
     const [tabs, setTabs] = useState([])
     const [photoList, setPhotoList] = useState([{"value": "Cover_1.jpg"}])
+
+    const newTabIndex = useRef(0);
+    const [form] = Form.useForm()
 
     const add = () => {
         const newActiveKey = `Music${newTabIndex.current++}`;
@@ -105,7 +25,7 @@ const ImportHelper = () => {
                 label: 'Music' + tabs.length,
                 music: new Music(),
                 key: newActiveKey,
-                children: renderTabItem(newActiveKey)
+                children: <RenderTabItem newActiveKey={newActiveKey} coverList={coverList}/>
             },
         ]);
         setActiveKey(newActiveKey);
@@ -129,7 +49,7 @@ const ImportHelper = () => {
             add();
         } else {
             remove(targetKey);
-            const _musicList = JSON.parse(JSON.stringify(form.getFieldValue('musicList')));
+            const _musicList = form.getFieldValue('musicList')
             delete _musicList[targetKey]
             form.setFieldValue('musicList', Object.keys(_musicList).length ? _musicList : null)
         }
@@ -142,7 +62,7 @@ const ImportHelper = () => {
         console.log(value)
     }
 
-    const renderPhotoList = (key) => {
+    useEffect(() => {
         const arr = []
         photoList.map(item => {
             arr.push({
@@ -150,13 +70,8 @@ const ImportHelper = () => {
                 label: item.value
             })
         })
-        return (
-            <Form.Item label={'封面图'} name={['musicList', key, 'cover_path']} initialValue={arr[0].label}
-                       required={true}>
-                <Select options={arr}/>
-            </Form.Item>
-        )
-    }
+        setCoverList(arr)
+    }, [photoList])
 
     return (
         <div style={{width: '500px'}}>
@@ -177,7 +92,7 @@ const ImportHelper = () => {
                                    message: '请输入专辑id',
                                },
                            ]}>
-                    <Input onChange={value => setAlbumId(value)} maxLength={3}/>
+                    <Input maxLength={3}/>
                 </Form.Item>
                 <Form.Item label={"专辑名"} name={"albumName"} rules={[
                     {
@@ -185,7 +100,7 @@ const ImportHelper = () => {
                         message: '请输入专辑名',
                     },
                 ]}>
-                    <Input onChange={value => setAlbumName(value)}/>
+                    <Input/>
                 </Form.Item>
                 <Form.Item label={"发售日期"} name={"date"} rules={[
                     {
