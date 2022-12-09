@@ -5,10 +5,6 @@ import locale from 'antd/lib/calendar/locale/zh_CN.js'
 const RenderTabItem = (props) => {
     const { coverList, newActiveKey} = props
 
-    useEffect(()=>{
-        console.log('coverList', coverList)
-    },[coverList])
-
     return (
         <Form.Item name={['musicList', newActiveKey]}>
             <>

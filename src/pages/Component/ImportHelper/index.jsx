@@ -14,23 +14,31 @@ const ImportHelper = () => {
     const newTabIndex = useRef(0);
     const [form] = Form.useForm()
 
-    const add = () => {
+    const onEdit = (targetKey, action) => {
+        if (action === 'add') {
+            addTab();
+        } else {
+            removeTab(targetKey);
+            const _musicList = form.getFieldValue('musicList')
+            delete _musicList[targetKey]
+            form.setFieldValue('musicList', Object.keys(_musicList).length ? _musicList : null)
+        }
+    };
+
+    const addTab = () => {
         const newActiveKey = `Music${newTabIndex.current++}`;
-        tabs.forEach((value, index) => {
-            value.label = "Music" + index
-        })
-        setTabs([
-            ...tabs,
-            {
+        renderTab((newTab) => {
+            newTab.push({
                 label: 'Music' + tabs.length,
                 music: new Music(),
                 key: newActiveKey,
                 children: <RenderTabItem newActiveKey={newActiveKey} coverList={coverList}/>
-            },
-        ]);
+            })
+        })
         setActiveKey(newActiveKey);
     };
-    const remove = (targetKey) => {
+
+    const removeTab = (targetKey) => {
         const targetIndex = tabs.findIndex((pane) => pane.key === targetKey);
         const newPanes = tabs.filter((pane) => pane.key !== targetKey);
         const tempList = []
@@ -44,16 +52,20 @@ const ImportHelper = () => {
         }
         setTabs(tempList);
     };
-    const onEdit = (targetKey, action) => {
-        if (action === 'add') {
-            add();
-        } else {
-            remove(targetKey);
-            const _musicList = form.getFieldValue('musicList')
-            delete _musicList[targetKey]
-            form.setFieldValue('musicList', Object.keys(_musicList).length ? _musicList : null)
-        }
-    };
+
+    const renderTab = (addFunc) => {
+        const newTab = []
+        tabs.forEach((value, index) => {
+            newTab.push({
+                label: "Music" + index,
+                music: value.music,
+                key: value.key,
+                children: <RenderTabItem newActiveKey={value.key} coverList={coverList}/>
+            })
+        })
+        addFunc && addFunc(newTab)
+        setTabs(newTab)
+    }
 
     const onFinish = (value) => {
         if (!form.getFieldValue('musicList')) {
@@ -72,6 +84,10 @@ const ImportHelper = () => {
         })
         setCoverList(arr)
     }, [photoList])
+
+    useEffect(() => {
+        renderTab()
+    }, [coverList])
 
     return (
         <div style={{width: '500px'}}>
