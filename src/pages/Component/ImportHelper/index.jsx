@@ -4,12 +4,15 @@ import {MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
 import locale from 'antd/lib/calendar/locale/zh_CN.js'
 import {Music} from '../../../models/Music'
 import RenderTabItem from './RenderItem'
+import {AppUtils} from "../../../../utils/app_utils";
+import dayjs from "dayjs";
 
 const ImportHelper = () => {
     const [activeKey, setActiveKey] = useState()
     const [coverList, setCoverList] = useState([])
     const [tabs, setTabs] = useState([])
     const [photoList, setPhotoList] = useState([{"value": "Cover_1.jpg"}])
+    const [artist, setArtist] = useState([])
 
     const newTabIndex = useRef(0);
     const [form] = Form.useForm()
@@ -26,13 +29,21 @@ const ImportHelper = () => {
     };
 
     const addTab = () => {
+        const albumId = form.getFieldValue("id")
+        const albumName = form.getFieldValue("albumName")
+        const baseUrl = form.getFieldValue("base_url")
+        if (AppUtils.isEmptyStr(albumId) || AppUtils.isEmptyStr(albumName) || AppUtils.isEmptyStr(baseUrl)) {
+            alert("请先填写专辑信息")
+            return
+        }
+
         const newActiveKey = `Music${newTabIndex.current++}`;
         renderTab((newTab) => {
             newTab.push({
                 label: 'Music' + tabs.length,
                 music: new Music(),
                 key: newActiveKey,
-                children: <RenderTabItem newActiveKey={newActiveKey} coverList={coverList}/>
+                children: <RenderTabItem newActiveKey={newActiveKey} coverList={coverList} artist={artist}/>
             })
         })
         setActiveKey(newActiveKey);
@@ -60,7 +71,7 @@ const ImportHelper = () => {
                 label: "Music" + index,
                 music: value.music,
                 key: value.key,
-                children: <RenderTabItem newActiveKey={value.key} coverList={coverList}/>
+                children: <RenderTabItem newActiveKey={value.key} coverList={coverList} artist={artist}/>
             })
         })
         addFunc && addFunc(newTab)
@@ -71,8 +82,50 @@ const ImportHelper = () => {
         if (!form.getFieldValue('musicList')) {
             alert('填歌曲')
         }
-        console.log(value)
+
+        const coverList = []
+        value.cover_path.map(item => {
+            coverList.push(value.base_url + item.value)
+        })
+
+        const musicIdList = []
+        const musicList = []
+        for (let i in value.musicList) {
+            const music = value.musicList[i]
+            const musicId = Number.parseInt(music.musicId)
+            musicIdList.push(musicId)
+            musicList.push({
+                "id": musicId,
+                "name": music.musicName,
+                "album": Number.parseInt(value.id),
+                "cover_path": music.cover_path,
+                "music_path": music.music_path,
+                "artist": artist.find(v => v.value === music.artist).label,
+                "artist_bin": music.artist,
+                "time": dayjs(music.time).format('mm:ss'),
+                "albumName": value.albumName,
+                "export": music.export,
+                "base_url": value.base_url
+            })
+        }
+
+        const album = {
+            "id": Number.parseInt(value.id),
+            "name": value.albumName,
+            "date": dayjs(value.date).format('YYYY.MM.DD'),
+            "cover_path": coverList,
+            "music": musicIdList
+        }
+
+        console.log(JSON.stringify(album))
+        console.log(JSON.stringify(musicList))
     }
+
+    useEffect(() => {
+        fetch('artist.json')
+            .then(resp => resp.json())
+            .then(setArtist)
+    }, [])
 
     useEffect(() => {
         const arr = []
@@ -100,12 +153,13 @@ const ImportHelper = () => {
                 <Form.Item label={"专辑id"} name={"id"}
                            getValueFromEvent={(e) => {
                                const {value} = e.target;
-                               return value.replace(/\D/g, "")
+                               return value.replace(/\D/g, '')
                            }}
                            rules={[
                                {
                                    required: true,
                                    message: '请输入专辑id',
+                                   pattern: new RegExp(/^[1-9]\d*$/, "g"),
                                },
                            ]}>
                     <Input maxLength={3}/>
@@ -114,6 +168,14 @@ const ImportHelper = () => {
                     {
                         required: true,
                         message: '请输入专辑名',
+                    },
+                ]}>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label={"专辑路径"} name={"base_url"} rules={[
+                    {
+                        required: true,
+                        message: '请输入专辑路径',
                     },
                 ]}>
                     <Input/>
@@ -204,12 +266,7 @@ const ImportHelper = () => {
                         <Select.Option value="小组曲">小组曲</Select.Option>
                     </Select>
                 </Form.Item>
-                <Form.Item label={"歌曲列表"} labelCol={{span: 24}} validateFirst={true} rules={[
-                    {
-                        required: true,
-                        message: '请添加歌曲',
-                    },
-                ]}>
+                <Form.Item label={"歌曲列表"} labelCol={{span: 24}} validateFirst={true} required={true}>
                     <Tabs
                         onChange={setActiveKey}
                         activeKey={activeKey}
