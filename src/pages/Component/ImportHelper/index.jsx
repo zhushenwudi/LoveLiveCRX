@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Button, DatePicker, Form, Input, Select, Tabs} from 'antd';
+import {Button, DatePicker, Form, Input, Select, Tabs, message} from 'antd';
 import {MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
 import locale from 'antd/lib/calendar/locale/zh_CN.js'
 import {Music} from '../../../models/Music'
@@ -8,6 +8,8 @@ import {AppUtils} from "../../../../utils/app_utils";
 import dayjs from "dayjs";
 
 const ImportHelper = () => {
+    const [messageApi, contextHolder] = message.useMessage();
+
     const [activeKey, setActiveKey] = useState()
     const [coverList, setCoverList] = useState([])
     const [tabs, setTabs] = useState([])
@@ -33,7 +35,10 @@ const ImportHelper = () => {
         const albumName = form.getFieldValue("albumName")
         const baseUrl = form.getFieldValue("base_url")
         if (AppUtils.isEmptyStr(albumId) || AppUtils.isEmptyStr(albumName) || AppUtils.isEmptyStr(baseUrl)) {
-            alert("请先填写专辑信息")
+            messageApi.open({
+                type: 'error',
+                content: '请先填写专辑信息'
+            })
             return
         }
 
@@ -80,7 +85,11 @@ const ImportHelper = () => {
 
     const onFinish = (value) => {
         if (!form.getFieldValue('musicList')) {
-            alert('填歌曲')
+            messageApi.open({
+                type: 'error',
+                content: '请添加歌曲列表信息'
+            })
+            return
         }
 
         const coverList = []
@@ -112,6 +121,7 @@ const ImportHelper = () => {
         const album = {
             "id": Number.parseInt(value.id),
             "name": value.albumName,
+            "category": value.category,
             "date": dayjs(value.date).format('YYYY.MM.DD'),
             "cover_path": coverList,
             "music": musicIdList
@@ -144,6 +154,7 @@ const ImportHelper = () => {
 
     return (
         <div style={{width: '500px'}}>
+            {contextHolder}
             <Form
                 form={form}
                 layout="horizontal"
@@ -264,6 +275,7 @@ const ImportHelper = () => {
                         <Select.Option value="精选集">精选集</Select.Option>
                         <Select.Option value="其他">其他</Select.Option>
                         <Select.Option value="小组曲">小组曲</Select.Option>
+                        <Select.Option value="组合">组合</Select.Option>
                     </Select>
                 </Form.Item>
                 <Form.Item label={"歌曲列表"} labelCol={{span: 24}} validateFirst={true} required={true}>
